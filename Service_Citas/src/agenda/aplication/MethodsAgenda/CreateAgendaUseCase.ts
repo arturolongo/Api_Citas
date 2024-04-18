@@ -21,7 +21,7 @@ export class CreateAgendaUseCase{
                 descripcion
             )
             if(agenda)this.notification.run(agenda)
-            this.socket.emit("payment", agenda);
+            this.socket.emit("agenda", agenda);
 
             return agenda;
         } catch (error) {
