@@ -4,7 +4,7 @@ import cors from 'cors'; // Importar cors
 import { Signale } from 'signale';
 import * as dotenv from 'dotenv';
 
-import { citaRouter } from './pago/infrastructure/routes/CitaRouter';
+import { citaRouter } from './citas/infrastructure/routes/CitaRouter';
 
 const app = express();
 dotenv.config();
