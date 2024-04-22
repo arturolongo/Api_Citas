@@ -1,27 +1,28 @@
 import { FormEvent, useEffect, useState, ChangeEvent } from "react";
 import { io, Socket } from "socket.io-client";
 import { toast } from "react-toastify";
+import "./App.css"
 
 interface FormData {
-  idPago: number;
-  cantidad: number;
-  concepto: string;
+  idCita: number; // Ahora definido como número
+  NombrePaciente: string;
+  Problema: string;
 }
 
-interface FacturaInfo {
-  idFactura: number;
-  pagoid: string;
+interface AgendaInfo {
+  idServicio_Citas: number;
+  descripcion: string;
 }
 
 export default function Home(): JSX.Element {
   const [formData, setFormData] = useState<FormData>({
-    idPago: 0,
-    cantidad: 0,
-    concepto: ""
+    idCita: 0, // Inicializado como número
+    NombrePaciente: "",
+    Problema: ""
   });
 
   const [socket, setSocket] = useState<Socket | null>(null);
-  const [facturatInfo, setFacturaInfo] = useState<FacturaInfo | null>(null);
+  const [agendaInfo, setAgendaInfo] = useState<AgendaInfo | null>(null);
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -34,7 +35,7 @@ export default function Home(): JSX.Element {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
-    const response = await fetch("http://54.237.83.120:3000/pagos", {
+    const response = await fetch("https://api-citasv2.onrender.com/citas", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -49,21 +50,27 @@ export default function Home(): JSX.Element {
   };
 
   useEffect(() => {
-    if (!socket) {
-      const newSocket = io("https://ws-5u2i.onrender.com");
-      newSocket.on("payment-processed", (pago: FacturaInfo) => {
-        console.log(pago);
-        setFacturaInfo(pago);
-        toast.success('pago confirmed!')
-        console.log("Se ha realizado el pago")
+    console.log("Hola");
+    
+    if (socket) {
+      const newSocket = io("https://ws-6g3l.onrender.com");
+      newSocket.on("agenda", (agenda: AgendaInfo) => {
+        console.log(agenda);
+        toast.success('agenda');
+        console.log("Se ha realizado el pago");
+        setAgendaInfo(agenda); // Actualiza el estado de agendaInfo con los datos recibidos
       });
       setSocket(newSocket);
     }
-
+    
     return () => {
-      socket?.disconnect();
+      socket?.disconnect(); 
     };
-  }, [socket]);
+  }, []);
+  
+  
+  
+
 
   return (
     <main className="min-h-screen bg-gradient-to-r from-neutral-800 to-sky-800 flex justify-center items-center">
@@ -71,57 +78,57 @@ export default function Home(): JSX.Element {
         onSubmit={handleSubmit}
         className="bg-white p-8 rounded-lg shadow-lg flex flex-col min-w-[400px]"
       >
-        <h1 className="text-3xl text-neutral-800 font-bold mb-4">Datos</h1>
+        <h1 className="text-3xl text-neutral-800 font-bold mb-4">Crear Cita</h1>
         <div className="mb-4">
           <label className="block text-neutral-800 font-semibold mb-2">
-            ID Pago
-          </label>
+            ID Citas
+          </label><br />
           <input
-            type="number"
-            name="idPago"
-            value={formData.idPago}
+            type="number" // Cambiado a number
+            name="idCita"
+            value={formData.idCita}
             onChange={handleInputChange}
             className="bg-neutral-100 appearance-none border rounded w-full py-2 px-3 text-neutral-800 leading-tight focus:outline-none focus:shadow-outline"
           />
         </div>
         <div className="mb-4">
           <label className="block text-neutral-800 font-semibold mb-2">
-            Cantidad
-          </label>
+            Nombre Paciente
+          </label><br />
           <input
-            type="number"
-            name="cantidad"
-            value={formData.cantidad}
+            type="text"
+            name="NombrePaciente"
+            value={formData.NombrePaciente}
             onChange={handleInputChange}
             className="bg-neutral-100 appearance-none border rounded w-full py-2 px-3 text-neutral-800 leading-tight focus:outline-none focus:shadow-outline"
           />
         </div>
         <div className="mb-4">
           <label className="block text-neutral-800 font-semibold mb-2">
-            Concepto
-          </label>
+            Problema
+          </label><br />
           <textarea
-            name="concepto"
-            value={formData.concepto}
+            name="Problema"
+            value={formData.Problema}
             onChange={handleInputChange}
             className="bg-neutral-100 appearance-none border rounded w-full py-2 px-3 text-neutral-800 leading-tight focus:outline-none focus:shadow-outline"
           ></textarea>
-        </div>
+        </div><br />
         <button
           type="submit"
           className="bg-sky-800 p-2 text-white rounded font-semibold w-full"
         >
           Enviar
         </button>
-      </form>
-      {facturatInfo && (
+        {agendaInfo && (
         <div>
           <h2>Pago Confirmado:</h2>
-          <p>ID Pago: {facturatInfo.idFactura}</p>
-          <p>PAGOID:{facturatInfo.pagoid}</p>
+          <p>ID Pago: {agendaInfo.idServicio_Citas}</p>
+          <p>PAGOID:{agendaInfo.descripcion}</p>
           
         </div>
       )}
+      </form>
     </main>
   );
 }
